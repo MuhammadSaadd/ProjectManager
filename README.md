@@ -108,10 +108,3 @@ flowchart LR
 | 1433 | SQL Server |
 | 3200 | Adminer (DB UI) |
 
-## Design decisions
-
-- **No custom CSS** — Tailwind utilities + Flowbite React only
-- **Repository interfaces in Domain layer** — contract defined innermost
-- **OpenAPI first** — spec generated from API, consumed by Orval on the frontend
-- **Moon monorepo** patterned after BytesMaestros/menuzi layout
-
