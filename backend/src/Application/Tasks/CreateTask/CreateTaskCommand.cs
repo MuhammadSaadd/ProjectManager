@@ -3,19 +3,19 @@ using Application.Common.Mappings;
 using Application.Common.Models;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Exceptions;
+using Domain.Primitives;
 using FluentValidation;
 using MediatR;
 using TaskStatus = Domain.Enums.TaskStatus;
 
-namespace Application.Tasks.Commands;
+namespace Application.Tasks.CreateTask;
 
 public sealed record CreateTaskCommand(
     Guid ProjectId,
     string Title,
     string? Description,
     DateTime? DueDate,
-    TaskStatus Status = TaskStatus.ToDo) : IRequest<TaskItemDto>;
+    TaskStatus Status = TaskStatus.ToDo) : IRequest<Result<TaskItemDto>>;
 
 public sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 {
@@ -31,22 +31,21 @@ public sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskCom
 public sealed class CreateTaskCommandHandler(
     IProjectRepository projects,
     ITaskRepository tasks,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateTaskCommand, TaskItemDto>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateTaskCommand, Result<TaskItemDto>>
 {
-    public async Task<TaskItemDto> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+    public async Task<Result<TaskItemDto>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        _ = await projects.GetByIdAsync(request.ProjectId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Project), request.ProjectId);
+        var project = await projects.GetByIdAsync(request.ProjectId, cancellationToken);
+        if (project is null)
+            return Result.Failure<TaskItemDto>(Error.NotFound(nameof(Project), request.ProjectId));
 
-        var task = new TaskItem(
-            request.ProjectId,
-            request.Title,
-            request.Description,
-            request.DueDate,
-            request.Status);
+        var taskResult = TaskItem.Create(request.ProjectId, request.Title, request.Description, request.DueDate, request.Status);
+        if (taskResult.IsFailure)
+            return Result.Failure<TaskItemDto>(taskResult.Error!);
 
+        var task = taskResult.Value;
         await tasks.AddAsync(task, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return task.ToDto();
+        return Result.Success(task.ToDto());
     }
 }

@@ -1,5 +1,5 @@
 using Domain.Enums;
-using Domain.Exceptions;
+using Domain.Primitives;
 using TaskStatus = Domain.Enums.TaskStatus;
 
 namespace Domain.Entities;
@@ -10,17 +10,14 @@ public class TaskItem
     {
     }
 
-    public TaskItem(
-        Guid projectId,
-        string title,
-        string? description,
-        DateTime? dueDate,
-        TaskStatus status = TaskStatus.ToDo)
+    private TaskItem(Guid projectId, string title, string? description, DateTime? dueDate, TaskStatus status)
     {
         Id = Guid.NewGuid();
         ProjectId = projectId;
-        UpdateDetails(title, description, dueDate);
-        ChangeStatus(status);
+        Title = title;
+        Description = description;
+        DueDate = dueDate;
+        Status = status;
     }
 
     public Guid Id { get; private set; }
@@ -31,35 +28,55 @@ public class TaskItem
     public Guid ProjectId { get; private set; }
     public Project? Project { get; private set; }
 
-    public void UpdateDetails(string title, string? description, DateTime? dueDate)
+    public static Result<TaskItem> Create(Guid projectId, string title, string? description, DateTime? dueDate, TaskStatus status = TaskStatus.ToDo)
     {
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new ValidationException("Task title is required.");
-        }
+        var validation = Validate(title, description);
+        if (validation.IsFailure)
+            return Result.Failure<TaskItem>(validation.Error!);
 
-        if (title.Length > 200)
-        {
-            throw new ValidationException("Task title must be 200 characters or fewer.");
-        }
+        if (!Enum.IsDefined(status))
+            return Result.Failure<TaskItem>(Error.Validation("Invalid task status."));
 
-        if (description is { Length: > 2000 })
-        {
-            throw new ValidationException("Task description must be 2000 characters or fewer.");
-        }
+        return Result.Success(new TaskItem(
+            projectId,
+            title.Trim(),
+            string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+            dueDate,
+            status));
+    }
+
+    public Result UpdateDetails(string title, string? description, DateTime? dueDate)
+    {
+        var validation = Validate(title, description);
+        if (validation.IsFailure)
+            return validation;
 
         Title = title.Trim();
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
         DueDate = dueDate;
+        return Result.Success();
     }
 
-    public void ChangeStatus(TaskStatus status)
+    public Result ChangeStatus(TaskStatus status)
     {
         if (!Enum.IsDefined(status))
-        {
-            throw new ValidationException("Invalid task status.");
-        }
+            return Result.Failure(Error.Validation("Invalid task status."));
 
         Status = status;
+        return Result.Success();
+    }
+
+    private static Result Validate(string title, string? description)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return Result.Failure(Error.Validation("Task title is required."));
+
+        if (title.Length > 200)
+            return Result.Failure(Error.Validation("Task title must be 200 characters or fewer."));
+
+        if (description is { Length: > 2000 })
+            return Result.Failure(Error.Validation("Task description must be 2000 characters or fewer."));
+
+        return Result.Success();
     }
 }

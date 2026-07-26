@@ -2,12 +2,13 @@ using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Common.Models;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentValidation;
 using MediatR;
 
-namespace Application.Projects.Commands;
+namespace Application.Projects.CreateProject;
 
-public sealed record CreateProjectCommand(string Name, string? Description) : IRequest<ProjectDto>;
+public sealed record CreateProjectCommand(string Name, string? Description) : IRequest<Result<ProjectDto>>;
 
 public sealed class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
@@ -20,13 +21,17 @@ public sealed class CreateProjectCommandValidator : AbstractValidator<CreateProj
 
 public sealed class CreateProjectCommandHandler(
     IProjectRepository projects,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateProjectCommand, ProjectDto>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateProjectCommand, Result<ProjectDto>>
 {
-    public async Task<ProjectDto> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ProjectDto>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        var project = new Project(request.Name, request.Description);
+        var projectResult = Project.Create(request.Name, request.Description);
+        if (projectResult.IsFailure)
+            return Result.Failure<ProjectDto>(projectResult.Error!);
+
+        var project = projectResult.Value;
         await projects.AddAsync(project, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return project.ToDto();
+        return Result.Success(project.ToDto());
     }
 }

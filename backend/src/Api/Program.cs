@@ -1,15 +1,8 @@
+using Api.Endpoints;
 using Application;
 using Infrastructure;
-using Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(
-            new System.Text.Json.Serialization.JsonStringEnumConverter());
-    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -37,8 +30,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -46,8 +37,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Frontend");
-app.MapControllers();
+
+app.MapProjectsEndpoints();
+app.MapTasksEndpoints();
 
 app.Run();
-
-public partial class Program;

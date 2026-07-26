@@ -1,13 +1,14 @@
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Common.Models;
+using Domain.Primitives;
 using FluentValidation;
 using MediatR;
 using TaskStatus = Domain.Enums.TaskStatus;
 
-namespace Application.Tasks.Queries;
+namespace Application.Tasks.GetTasksByStatus;
 
-public sealed record GetTasksByStatusQuery(TaskStatus Status) : IRequest<IReadOnlyList<TaskItemDto>>;
+public sealed record GetTasksByStatusQuery(TaskStatus Status) : IRequest<Result<IReadOnlyList<TaskItemDto>>>;
 
 public sealed class GetTasksByStatusQueryValidator : AbstractValidator<GetTasksByStatusQuery>
 {
@@ -18,13 +19,13 @@ public sealed class GetTasksByStatusQueryValidator : AbstractValidator<GetTasksB
 }
 
 public sealed class GetTasksByStatusQueryHandler(ITaskRepository tasks)
-    : IRequestHandler<GetTasksByStatusQuery, IReadOnlyList<TaskItemDto>>
+    : IRequestHandler<GetTasksByStatusQuery, Result<IReadOnlyList<TaskItemDto>>>
 {
-    public async Task<IReadOnlyList<TaskItemDto>> Handle(
+    public async Task<Result<IReadOnlyList<TaskItemDto>>> Handle(
         GetTasksByStatusQuery request,
         CancellationToken cancellationToken)
     {
         var items = await tasks.GetByStatusAsync(request.Status, cancellationToken);
-        return items.Select(t => t.ToDto()).ToList();
+        return Result.Success(items.Select(t => t.ToDto()).ToList() as IReadOnlyList<TaskItemDto>);
     }
 }
