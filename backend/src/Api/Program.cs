@@ -1,17 +1,18 @@
 using Api.Endpoints;
 using Application;
 using Infrastructure;
+using Microsoft.AspNetCore.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddOpenApi(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
-        Title = "Project Manager API",
-        Version = "v1",
-        Description = "REST API for managing projects and tasks."
+        document.Info.Title = "Project Manager API";
+        document.Info.Version = "v1";
+        document.Info.Description = "REST API for managing projects and tasks.";
+        return Task.CompletedTask;
     });
 });
 
@@ -30,10 +31,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.MapOpenApi();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
 }
 
 app.UseCors("Frontend");
