@@ -1,0 +1,39 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: csharp
+stack: backend
+layer: unknown
+
+tasks:
+  restore:
+    command: "dotnet restore"
+    inputs:
+      - "**/*.csproj"
+      - "ProjectManager.sln"
+      - "global.json"
+
+  build:
+    command: "dotnet build --no-restore"
+    deps:
+      - "restore"
+    inputs:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "ProjectManager.sln"
+      - "global.json"
+
+  test:
+    command: "dotnet test --no-build --verbosity quiet"
+    deps:
+      - "build"
+    inputs:
+      - "**/*.cs"
+      - "**/*.csproj"
+
+  migrate:
+    command: "dotnet ef database update --project src/Infrastructure --startup-project src/Api"
+    deps:
+      - "build"
+    preset: "utility"
+    env:
+      ConnectionStrings__Default: "Server=localhost,1433;Database=ProjectManager;User Id=sa;Password=Your_strong_Password123;TrustServerCertificate=True;"

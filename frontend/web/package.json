@@ -1,0 +1,13 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Frontend not scaffolded yet' && exit 1",
+    "build": "echo 'Frontend not scaffolded yet' && exit 1",
+    "lint": "echo 'Frontend not scaffolded yet' && exit 1",
+    "types": "echo 'Frontend not scaffolded yet' && exit 1",
+    "generate-dtos": "echo 'Orval not configured yet' && exit 1"
+  }
+}

@@ -1,0 +1,15 @@
+$schema: "https://moonrepo.dev/schemas/tasks.json"
+
+# Inherited only by backend application hosts (e.g. Api)
+inheritedBy:
+  stacks: ["backend"]
+  layers: ["application"]
+
+tasks:
+  dev:
+    command: "dotnet watch run ."
+    deps:
+      - "backend:build"
+    preset: "server"
+    options:
+      envFile: true

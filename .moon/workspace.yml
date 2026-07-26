@@ -1,0 +1,10 @@
+$schema: "https://moonrepo.dev/schemas/workspace.json"
+
+projects:
+  backend: "backend"
+  api: "backend/src/Api"
+  web: "frontend/web"
+
+vcs:
+  client: "git"
+  defaultBranch: "main"

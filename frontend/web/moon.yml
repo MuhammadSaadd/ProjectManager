@@ -1,0 +1,48 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: typescript
+stack: frontend
+layer: application
+
+tasks:
+  install:
+    command: "pnpm install"
+    options:
+      cache: false
+
+  dev:
+    command: "pnpm dev"
+    preset: "server"
+    options:
+      envFile: true
+
+  build:
+    command: "pnpm build"
+    deps:
+      - "install"
+    inputs:
+      - "src/**/*"
+      - "index.html"
+      - "package.json"
+      - "vite.config.ts"
+      - "tsconfig*.json"
+
+  lint:
+    command: "pnpm lint"
+    deps:
+      - "install"
+
+  types:
+    command: "pnpm types"
+    deps:
+      - "install"
+
+  generate-dtos:
+    command: "pnpm generate-dtos"
+    deps:
+      - "install"
+    inputs:
+      - "/schemas/api.json"
+      - "orval.config.ts"
+    outputs:
+      - "src/lib/api/generated"
