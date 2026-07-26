@@ -9,7 +9,7 @@ tasks:
     command: "dotnet restore"
     inputs:
       - "**/*.csproj"
-      - "ProjectManager.sln"
+      - "ProjectManager.slnx"
       - "global.json"
 
   build:
@@ -19,7 +19,7 @@ tasks:
     inputs:
       - "**/*.cs"
       - "**/*.csproj"
-      - "ProjectManager.sln"
+      - "ProjectManager.slnx"
       - "global.json"
 
   test:
@@ -36,4 +36,5 @@ tasks:
       - "build"
     preset: "utility"
     env:
+      PATH: "$HOME/.dotnet/tools:$PATH"
       ConnectionStrings__Default: "Server=localhost,1433;Database=ProjectManager;User Id=sa;Password=Your_strong_Password123;TrustServerCertificate=True;"
