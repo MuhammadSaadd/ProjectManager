@@ -110,12 +110,8 @@ flowchart LR
 
 ## Design decisions
 
-- **No event sourcing** — simple CRUD with CQRS separation
 - **No custom CSS** — Tailwind utilities + Flowbite React only
 - **Repository interfaces in Domain layer** — contract defined innermost
 - **OpenAPI first** — spec generated from API, consumed by Orval on the frontend
 - **Moon monorepo** patterned after BytesMaestros/menuzi layout
 
-## Out of scope
-
-Authentication, microservice split, production deploy, heavy test suite.
