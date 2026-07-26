@@ -31,10 +31,9 @@ tasks:
       - "**/*.csproj"
 
   migrate:
-    command: "dotnet ef database update --project src/Infrastructure --startup-project src/Api"
+    command: "/home/saad/.dotnet/tools/dotnet-ef database update --project src/Infrastructure --startup-project src/Api"
     deps:
       - "build"
     preset: "utility"
     env:
-      PATH: "$HOME/.dotnet/tools:$PATH"
       ConnectionStrings__Default: "Server=localhost,1433;Database=ProjectManager;User Id=sa;Password=Your_strong_Password123;TrustServerCertificate=True;"
