@@ -1,4 +1,4 @@
-using Application.Common.Interfaces;
+using Domain.Repositories;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;

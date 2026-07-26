@@ -1,4 +1,4 @@
-using Application.Common.Interfaces;
+using Domain.Repositories;
 using Application.Common.Mappings;
 using Application.Common.Models;
 using Domain.Primitives;
