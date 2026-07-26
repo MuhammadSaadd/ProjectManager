@@ -6,5 +6,4 @@ projects:
   web: "frontend/web"
 
 vcs:
-  manager: git
   defaultBranch: "main"
